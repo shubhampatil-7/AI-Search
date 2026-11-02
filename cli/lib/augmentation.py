@@ -109,3 +109,34 @@ def cite(query, limit)-> None:
     print("\n")
     print("LLM Answer:\n")
     print(llm_res)
+
+def conversate(question, limit) -> None:
+    docs = rrf_search_command(question, RRF_K, None, limit)
+    context = docs["results"]
+
+    prompt = f"""Answer the user's question based on the provided movies that are available on Webflyx, a streaming service.
+
+    Question: {question}
+
+    Documents:
+    {context}
+
+    Instructions:
+    - Answer questions directly and concisely
+    - Be casual and conversational
+    - Don't be cringe or hype-y
+    - Talk like a normal person would in a chat conversation
+
+    Answer:"""
+
+    response = client.chat.completions.create( model=model, messages=[{"role": "user", "content": prompt}]
+            )
+    
+    llm_res = (response.choices[0].message.content or "").strip().strip('"')
+    
+    print("Search Results:\n")
+    for i in context:
+        print(f"- {i['title']}")
+    print("\n")
+    print("Answer:\n")
+    print(llm_res)

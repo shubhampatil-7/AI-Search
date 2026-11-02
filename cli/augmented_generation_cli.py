@@ -1,5 +1,5 @@
 import argparse
-from lib.augmentation import augment, summarize, cite
+from lib.augmentation import augment, summarize, cite, conversate
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Retrieval Augmented Generation CLI")
@@ -19,6 +19,10 @@ def main() -> None:
     citation_parser.add_argument("query", type=str, help="give search query ")
     citation_parser.add_argument("--limit", type=int, default=5, help="limit to search results")
 
+    question_parser = subparsers.add_parser("question", help="Answers your questions")
+    question_parser.add_argument("question", type=str, help="ask your question here")
+    question_parser.add_argument("--limit", type=int, default=5, help = "Limit to search results")
+
     args = parser.parse_args()
 
     match args.command:
@@ -33,6 +37,9 @@ def main() -> None:
 
         case "citations":
             cite(args.query, args.limit)
+
+        case "question":
+            conversate(args.question, args.limit)
         case _:
             parser.print_help()
 
