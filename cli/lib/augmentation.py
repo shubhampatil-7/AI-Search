@@ -16,7 +16,7 @@ client = OpenAI(base_url="https://openrouter.ai/api/v1", api_key=api_key)
 model = "openrouter/free"
 
 def augment(query, limit) -> None:
-    movies = load_movies()
+    # movies = load_movies()
     res = rrf_search_command(query, RRF_K, None, limit)
     docs = res["results"]
 
@@ -44,7 +44,7 @@ def augment(query, limit) -> None:
     print(llm_res)
 
 def summarize(query, limit) -> None:
-    movies = load_movies()
+    # movies = load_movies()
     res = rrf_search_command(query, RRF_K, None, limit)
     results = res["results"]
 
@@ -72,4 +72,40 @@ def summarize(query, limit) -> None:
         print(f"    - {i['title']}")
     print("\n")
     print("LLM Summary:\n")
+    print(llm_res)
+
+
+def cite(query, limit)-> None:
+    docs = rrf_search_command(query, RRF_K, None, limit)
+    documents = docs["results"]
+
+    prompt = f"""Answer the query below and give information based on the provided documents.
+
+    The answer should be tailored to users of Webflyx, a movie streaming service.
+    If not enough information is available to provide a good answer, say so, but give the best answer possible while citing the sources available.
+
+    Query: {query}
+
+    Documents:
+    {documents}
+
+    Instructions:
+    - Provide a comprehensive answer that addresses the query
+    - Cite sources in the format [1], [2], etc. when referencing information
+    - If sources disagree, mention the different viewpoints
+    - If the answer isn't in the provided documents, say "I don't have enough information"
+    - Be direct and informative
+
+    Answer:"""
+
+    response = client.chat.completions.create( model=model, messages=[{"role": "user", "content": prompt}]
+        )
+
+    llm_res = (response.choices[0].message.content or "").strip().strip('"')
+    
+    print("Search Results:\n")
+    for i in documents:
+        print(f"- {i['title']}")
+    print("\n")
+    print("LLM Answer:\n")
     print(llm_res)
